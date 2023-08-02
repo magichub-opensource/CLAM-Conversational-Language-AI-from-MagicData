@@ -2,12 +2,11 @@ import os,sys,argparse
 # os.environ['CUDA_VISIBLE_DEVICES'] = '1'
 import torch
 import re
-from transformers import AutoTokenizer
 import transformers
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
-# modelpath = 'models/clam-7b' # local path
-modelpath = 'MagicHub/clam-7b' # huggingface repo 
+# modelpath = 'models/Chinese-llama2-CLAM-7b' # local path
+modelpath = 'MagicHub/Chinese-llama2-CLAM-7b' # huggingface repo 
 
 print(f'model path: {modelpath}')
 model = AutoModelForCausalLM.from_pretrained(modelpath, device_map="cuda:0", torch_dtype=torch.float16)
