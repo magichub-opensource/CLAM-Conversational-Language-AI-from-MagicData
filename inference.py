@@ -10,10 +10,7 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 modelpath = 'MagicHub/clam-7b' # huggingface repo 
 
 print(f'model path: {modelpath}')
-# model = AutoModelForCausalLM.from_pretrained(modelpath, device_map="cuda:0", torch_dtype=torch.float16, trust_remote_code=True)
-# model = AutoModelForCausalLM.from_pretrained(modelpath, device_map="cuda:0", torch_dtype=torch.float16, trust_remote_code=True)
 model = AutoModelForCausalLM.from_pretrained(modelpath, device_map="cuda:0", torch_dtype=torch.float16)
-# tokenizer = AutoTokenizer.from_pretrained(modelpath, use_fast=False, trust_remote_code=True)
 tokenizer = AutoTokenizer.from_pretrained(modelpath, use_fast=False)
 
 prompt = "歌剧和京剧的区别是什么？\n"
@@ -25,5 +22,4 @@ generate_ids = model.generate(
 response = tokenizer.batch_decode(generate_ids, skip_special_tokens=True, clean_up_tokenization_spaces=False)[0]
 cleaned_response = re.sub('^'+prompt,'', response)
 print(f'输入：\n{prompt}\n')
-# print(f"原始输出：\n{response}\n")
-print(f"移除原始prompt后的输出：\n{cleaned_response}\n")
+print(f"输出：\n{cleaned_response}\n")
