@@ -2,7 +2,7 @@
 
 ## 背景
 
-本项目旨在介绍 Magic Data 的 Clam 项目。该项目包含：
+本项目旨在介绍 Magic Data 的 Clam 项目。目前，该项目包含：
 
 1. 自研的中文指令数据集
 2. 使用该自研数据集微调的语言模型
@@ -10,7 +10,7 @@
 
 目前，我们开放了使用自研数据微调的模型（1000步）和使用开源数据微调的模型（1000步），可以在 huggingface 下载。
 
-本文档介绍了我们所作的微调实验、对比样例、模型下载方式，以及我们实验中使用的推理和微调方法。
+本文档介绍了我们所做的实验、对比示例、模型下载方式，以及实验中使用的推理和微调方法，
 
 ## 模型下载和使用说明
 
@@ -22,6 +22,10 @@
 
 ### 模型推理
 
+单卡加载一个模型需要15G显存。本次实验中，我们使用了一张A10(40G)显卡进行推理。
+
+#### Web Demo
+
 我们使用 [text-generation-webui](https://github.com/oobabooga/text-generation-webui/tree/main) 开源项目搭建的 demo 进行推理，得到文档中的对比样例。该demo支持在网页端切换模型、调整多种常见参数等。
 
 实验环境：py310-torch1.13.1-cuda11.6-cudnn8
@@ -31,13 +35,19 @@ git clone https://github.com/oobabooga/text-generation-webui.git
 cd text-generation-webui
 pip install -r requirements.txt
 
-# 建议使用软链接将模型绝对路径链至 `./models`。也可以直接拷贝进去。
-ln -s ${model_dir_absolute_path} models/${model_name}
+# 建议使用软链接将模型绝对路径链至 `./models`。也可以直接拷贝进去。(llama前缀的作用是确保text-gen将该模型作为类llama模型，具体参见 ./models/config.yaml)
+ln -s ${model_dir_absolute_path} models/llama-${model_name}
 
 # 启动服务
-python server.py --model ${model_name} --listen --listen-host 0.0.0.0 --listen-port ${port}
+python server.py --model llama-${model_name} --listen --listen-host 0.0.0.0 --listen-port ${port}
 ```
-如果服务正常启动，就可以通过该端口访问服务了 ${server_ip}:${port}
+如果服务正常启动，就可以通过该端口访问服务了 `${server_ip}:${port}`
+
+#### 代码调用
+
+```
+export CUDA_VISIBLE_DEVICES="0" && python inference.py
+```
 
 ## 实验介绍
 
@@ -290,12 +300,15 @@ chinese-llama-2-7b
 Where is the dish "Ma Po Tofu"?
 ```
 
-### 实验小结
+### 小结
+
+在调试和对比不同模型输出的过程中，我们发现：
 
 1. 从对比样例可以看出，当我们直接用自然语言描述任务，基线模型相比微调模型更容易“崩坏”。
 2. 开源数据微调的模型似乎容易先续写几句任务然后才开始进行回答。
 3. 测试时发现指令结尾有没有换行符、有几个换行符，也会导致一定的输出变化。使用模型时如果遇到自动续写问题的情况，可以考虑在问题末尾多添加一个换行符。
 4. 基于我们目前的观察来看，自研数据微调后的模型确实可以使模型更好地理解指令意图，生成更加恰当的回答。
+5. 可以发现，训练至这一阶段的语言模型，在进行自由问答时，比底座模型有明显进步，生成答案的随机性还是较大，但无法保证优质答案的复现。
 
 
 ## 协议
